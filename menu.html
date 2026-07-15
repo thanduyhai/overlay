@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🌱 Grow A Garden — Chọn item cho overlay</title>
+<style>
+    :root {
+        --bg: #12201a;
+        --panel: #1a2b22;
+        --panel-2: #223629;
+        --ink: #eaf5e9;
+        --muted: #8fa895;
+        --leaf: #4fbf5f;
+        --leaf-deep: #2f9e44;
+        --gold: #ffd23f;
+        --border: #2c4433;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(circle at 20% 0%, #1c3226 0%, #0f1a14 55%, #0b120e 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        padding: 24px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        font-size: 26px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--leaf), var(--gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .header p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+    .layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        align-items: start;
+    }
+
+    @media (max-width: 900px) {
+        .layout { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--leaf-deep), var(--leaf));
+        color: #0b120e;
+        border-color: transparent;
+    }
+
+    .search-box {
+        width: 100%;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 9px 14px;
+        color: var(--ink);
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+    .search-box:focus { outline: none; border-color: var(--leaf); }
+    .search-box::placeholder { color: var(--muted); }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+        max-height: 62vh;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .grid::-webkit-scrollbar { width: 8px; }
+    .grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+
+    .item-card {
+        background: var(--panel-2);
+        border: 1.5px solid var(--rarity-color, var(--border));
+        border-radius: 12px;
+        padding: 10px;
+        text-align: center;
+        position: relative;
+        transition: transform 0.15s;
+    }
+    .item-card.selected { box-shadow: 0 0 0 2px var(--rarity-color, var(--leaf)), 0 0 16px -2px var(--rarity-color, transparent); }
+
+    .item-card img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: contain;
+        background: #0f1a14;
+        border-radius: 8px;
+        display: block;
+    }
+
+    .item-name { font-size: 12.5px; font-weight: 700; margin-top: 6px; }
+    .item-rarity {
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--rarity-color, var(--muted));
+        margin-top: 2px;
+    }
+
+    .qty-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .qty-btn {
+        width: 24px; height: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--ink);
+        font-weight: 800;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+    }
+    .qty-btn:hover { border-color: var(--leaf); }
+    .qty-val { font-size: 14px; font-weight: 800; min-width: 20px; }
+
+    .variant-select {
+        margin-top: 6px;
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-size: 10.5px;
+        border-radius: 6px;
+        padding: 3px 4px;
+    }
+
+    /* Sidebar */
+    .sidebar { position: sticky; top: 24px; }
+    .sidebar h2 { font-size: 16px; margin-bottom: 10px; }
+
+    .selected-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 40vh;
+        overflow-y: auto;
+        margin-bottom: 14px;
+    }
+    .selected-empty { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
+
+    .selected-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 8px;
+    }
+    .selected-item img { width: 32px; height: 32px; object-fit: contain; background: #0f1a14; border-radius: 6px; }
+    .selected-item .meta { flex: 1; font-size: 12px; }
+    .selected-item .meta b { font-size: 12.5px; }
+    .selected-item .remove { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 16px; }
+
+    .generate-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, var(--leaf-deep), var(--leaf));
+        color: #0b120e;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        transition: transform 0.15s;
+    }
+    .generate-btn:hover { transform: translateY(-1px); }
+    .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .link-box {
+        margin-top: 14px;
+        display: none;
+    }
+    .link-box.show { display: block; }
+    .link-box textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--leaf);
+        font-size: 11px;
+        border-radius: 8px;
+        padding: 8px;
+        resize: none;
+        height: 70px;
+        font-family: monospace;
+    }
+    .link-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .link-actions button, .link-actions a {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .link-actions button:hover, .link-actions a:hover { border-color: var(--leaf); }
+
+    .stats { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>🌱 Grow A Garden — Bảng chọn Overlay</h1>
+        <p>Chọn seed / pet / gear, đặt số lượng → sinh link overlay trong suốt cho livestream</p>
+    </div>
+</div>
+
+<div class="layout">
+    <div class="panel">
+        <div class="tabs" id="tabs"></div>
+        <input type="text" class="search-box" id="searchInput" placeholder="Tìm item..." />
+        <div class="stats" id="stats"></div>
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="panel sidebar">
+        <h2>Đã chọn (<span id="selCount">0</span>)</h2>
+        <div class="selected-list" id="selectedList">
+            <div class="selected-empty">Chưa chọn item nào</div>
+        </div>
+        <button class="generate-btn" id="generateBtn" disabled>Tạo link overlay</button>
+        <div class="link-box" id="linkBox">
+            <textarea id="linkOutput" readonly></textarea>
+            <div class="link-actions">
+                <button id="copyBtn">📋 Copy link</button>
+                <a id="openBtn" href="#" target="_blank">↗ Mở thử</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="items-data.js"></script>
+<script>
+    const CATS = [
+        { key: 'seed', label: '🌱 Seeds' },
+        { key: 'pet', label: '🐾 Pets' },
+        { key: 'gear', label: '🛠️ Gear' }
+    ];
+
+    let currentCat = 'seed';
+    let searchQuery = '';
+    // selections keyed by item id -> { qty, variant }
+    const selections = {};
+
+    const tabsEl = document.getElementById('tabs');
+    const gridEl = document.getElementById('grid');
+    const searchEl = document.getElementById('searchInput');
+    const statsEl = document.getElementById('stats');
+    const selectedListEl = document.getElementById('selectedList');
+    const selCountEl = document.getElementById('selCount');
+    const generateBtn = document.getElementById('generateBtn');
+    const linkBox = document.getElementById('linkBox');
+    const linkOutput = document.getElementById('linkOutput');
+    const copyBtn = document.getElementById('copyBtn');
+    const openBtn = document.getElementById('openBtn');
+
+    function renderTabs() {
+        tabsEl.innerHTML = CATS.map(c =>
+            `<button class="tab-btn ${c.key === currentCat ? 'active' : ''}" data-cat="${c.key}">${c.label}</button>`
+        ).join('');
+        tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentCat = btn.dataset.cat;
+                renderTabs();
+                renderGrid();
+            });
+        });
+    }
+
+    function renderGrid() {
+        let items = ITEMS_DB[currentCat];
+        if (searchQuery.trim()) {
+            const q = searchQuery.trim().toLowerCase();
+            items = items.filter(i => i.name.toLowerCase().includes(q));
+        }
+        statsEl.textContent = `${items.length} item`;
+
+        gridEl.innerHTML = items.map(item => {
+            const sel = selections[item.id];
+            const qty = sel ? sel.qty : 0;
+            const color = RARITY_COLOR[item.rarity] || '';
+            const isPet = item.category === 'pet';
+            const variant = sel ? sel.variant : 0;
+
+            let variantSelect = '';
+            if (isPet) {
+                variantSelect = `
+                    <select class="variant-select" data-id="${item.id}" ${qty === 0 ? 'disabled' : ''}>
+                        <option value="0" ${variant === 0 ? 'selected' : ''}>Thường</option>
+                        <option value="1" ${variant === 1 ? 'selected' : ''}>Big</option>
+                        <option value="2" ${variant === 2 ? 'selected' : ''}>Mega</option>
+                        <option value="3" ${variant === 3 ? 'selected' : ''}>Rainbow</option>
+                        <option value="4" ${variant === 4 ? 'selected' : ''}>Big Rainbow</option>
+                        <option value="5" ${variant === 5 ? 'selected' : ''}>Mega Rainbow</option>
+                    </select>`;
+            }
+
+            return `
+                <div class="item-card ${qty > 0 ? 'selected' : ''}" style="--rarity-color:${color}">
+                    <img src="${item.image}" alt="${item.name}" loading="lazy"
+                         onerror="this.src='https://placehold.co/150x150/1a2b22/4fbf5f?text=${encodeURIComponent(item.name)}'" />
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-rarity">${item.rarity}</div>
+                    <div class="qty-row">
+                        <button class="qty-btn" data-action="dec" data-id="${item.id}">−</button>
+                        <span class="qty-val">${qty}</span>
+                        <button class="qty-btn" data-action="inc" data-id="${item.id}">+</button>
+                    </div>
+                    ${variantSelect}
+                </div>
+            `;
+        }).join('');
+
+        gridEl.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id;
+                const action = btn.dataset.action;
+                if (!selections[id]) selections[id] = { qty: 0, variant: 0 };
+                if (action === 'inc') selections[id].qty++;
+                if (action === 'dec') selections[id].qty = Math.max(0, selections[id].qty - 1);
+                if (selections[id].qty === 0) delete selections[id];
+                renderGrid();
+                renderSelected();
+            });
+        });
+
+        gridEl.querySelectorAll('.variant-select').forEach(sel => {
+            sel.addEventListener('change', () => {
+                const id = sel.dataset.id;
+                if (selections[id]) selections[id].variant = parseInt(sel.value, 10);
+                renderSelected();
+            });
+        });
+    }
+
+    function renderSelected() {
+        const ids = Object.keys(selections);
+        selCountEl.textContent = ids.length;
+        generateBtn.disabled = ids.length === 0;
+        linkBox.classList.remove('show');
+
+        if (ids.length === 0) {
+            selectedListEl.innerHTML = '<div class="selected-empty">Chưa chọn item nào</div>';
+            return;
+        }
+
+        selectedListEl.innerHTML = ids.map(id => {
+            const item = ITEM_LOOKUP[id];
+            const sel = selections[id];
+            const variantLabel = VARIANT_LABEL[sel.variant];
+            return `
+                <div class="selected-item">
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/60x60/1a2b22/4fbf5f?text=%20'" />
+                    <div class="meta">
+                        <b>${item.name}</b> ×${sel.qty}${variantLabel ? ` · ${variantLabel}` : ''}
+                    </div>
+                    <button class="remove" data-id="${id}">✕</button>
+                </div>
+            `;
+        }).join('');
+
+        selectedListEl.querySelectorAll('.remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                delete selections[btn.dataset.id];
+                renderGrid();
+                renderSelected();
+            });
+        });
+    }
+
+    searchEl.addEventListener('input', () => {
+        searchQuery = searchEl.value;
+        renderGrid();
+    });
+
+    generateBtn.addEventListener('click', () => {
+        const list = Object.keys(selections).map(id => ({
+            id,
+            qty: selections[id].qty,
+            variant: selections[id].variant
+        }));
+        const encoded = encodeShowcase(list);
+        const base = window.location.href.replace(/menu\.html.*$/, 'share.html');
+        const url = `${base}?showcase=${encoded}`;
+        linkOutput.value = url;
+        openBtn.href = url;
+        linkBox.classList.add('show');
+    });
+
+    copyBtn.addEventListener('click', () => {
+        linkOutput.select();
+        navigator.clipboard.writeText(linkOutput.value).then(() => {
+            copyBtn.textContent = '✅ Đã copy';
+            setTimeout(() => copyBtn.textContent = '📋 Copy link', 1500);
+        });
+    });
+
+    renderTabs();
+    renderGrid();
+    renderSelected();
+</script>
+
+</body>
+</html>
