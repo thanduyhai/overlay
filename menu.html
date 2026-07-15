@@ -25,6 +25,7 @@
         color: var(--ink);
         min-height: 100vh;
         padding: 24px;
+        overflow-y: auto; /* ← SỬA: cho phép cuộn trang */
     }
 
     .header {
@@ -51,6 +52,7 @@
         grid-template-columns: 1fr 340px;
         gap: 20px;
         align-items: start;
+        padding-bottom: 100px; /* ← THÊM: khoảng trống dưới cùng */
     }
 
     @media (max-width: 900px) {
@@ -62,6 +64,7 @@
         border: 1px solid var(--border);
         border-radius: 14px;
         padding: 18px;
+        margin-bottom: 20px; /* ← THÊM: cách nhau giữa các panel */
     }
 
     .tabs {
@@ -108,6 +111,7 @@
         max-height: 62vh;
         overflow-y: auto;
         padding-right: 4px;
+        padding-bottom: 20px; /* ← THÊM: khoảng trống trong grid */
     }
 
     .grid::-webkit-scrollbar { width: 8px; }
@@ -121,6 +125,7 @@
         text-align: center;
         position: relative;
         transition: transform 0.15s;
+        min-height: 210px; /* ← THÊM: đảm bảo đủ chiều cao */
     }
     .item-card.selected { box-shadow: 0 0 0 2px var(--rarity-color, var(--leaf)), 0 0 16px -2px var(--rarity-color, transparent); }
 
@@ -176,16 +181,26 @@
     }
 
     /* Sidebar */
-    .sidebar { position: sticky; top: 24px; }
+    .sidebar { 
+        position: sticky; 
+        top: 24px; 
+        max-height: 80vh; /* ← THÊM: giới hạn chiều cao */
+        overflow-y: auto; /* ← THÊM: cho phép cuộn bên trong */
+    }
+
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+
     .sidebar h2 { font-size: 16px; margin-bottom: 10px; }
 
     .selected-list {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        max-height: 40vh;
+        max-height: 35vh;
         overflow-y: auto;
         margin-bottom: 14px;
+        padding-bottom: 10px; /* ← THÊM: khoảng trống dưới */
     }
     .selected-empty { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
 
@@ -214,12 +229,13 @@
         font-size: 14px;
         cursor: pointer;
         transition: transform 0.15s;
+        margin-bottom: 10px; /* ← THÊM: cách link box */
     }
     .generate-btn:hover { transform: translateY(-1px); }
     .generate-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
     .link-box {
-        margin-top: 14px;
+        margin-top: 10px;
         display: none;
     }
     .link-box.show { display: block; }
@@ -235,9 +251,10 @@
         height: 70px;
         font-family: monospace;
     }
-    .link-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .link-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     .link-actions button, .link-actions a {
         flex: 1;
+        min-width: 80px;
         text-align: center;
         padding: 8px;
         border-radius: 8px;
